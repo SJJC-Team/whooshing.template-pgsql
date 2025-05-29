@@ -1,5 +1,5 @@
-# Whooshing 服务模块模版
-基于 [Vapor](https://vapor.codes/) 以及 [WhooshingServer](https://github.com/SJJC-Team/whooshing.toolbox-server) 构建的服务模块模版。
+# Whooshing with PostgreSQL ORM 服务模块模版
+基于 [Vapor](https://vapor.codes/) 以及 [WhooshingServer](https://github.com/SJJC-Team/whooshing.toolbox-server) 构建的服务模块模版，且提供 PostgreSQL 数据库 ORM 支持。
 
 用于快速初始化一个 Whooshing 系统的服务模块且与其深度集成，可创建 API / HTTPS / INLINE 三种子模块类型且支持进行独立开发环境测试。
 
@@ -7,6 +7,7 @@
 
 - [whooshing.toolbox-server](https://github.com/SJJC-Team/whooshing.toolbox-server)
 - [whooshing.toolbox-basic](https://github.com/SJJC-Team/whooshing.toolbox-basic)
+- [whooshing.toolbox-pgsql](https://github.com/SJJC-Team/whooshing.toolbox-pgsql)
 - [whooshing-vapor](https://github.com/SJJC-Team/whooshing-vapor)
 
 本项目高度依赖  [Vapor](https://vapor.codes/)，另请参阅 [Vapor 官方文档](https://docs.vapor.codes/)
