@@ -70,7 +70,7 @@
    // 初始化你的 PostgreSQL 配置，此处设置，将连接到所有的服务模块，你也可以提供为不同的子模块提供不同的数据库
    // 这些参数仅在独立测试环境中可用
    // 生产环境中将由 Whooshing 系统提供加密数据库
-   let dataBases: [Environment.DB] = [
+   static let dataBases: [Environment.DB] = [
        .init(
            name: "postgres",
            port: 5432,
@@ -86,7 +86,7 @@
    >
    > 根据你自己的数据库服务调整连接参数
 
-   该模版默认提供了 users 表的创建示例，将会在服务运行时自动创建
+   该模版默认提供了 users 表的创建示例
 
    **再次重申，这些参数仅在独立测试环境中被使用，在生产环境中不会使用这些参数**
 

@@ -14,9 +14,9 @@ final class User: PGModel, @unchecked Sendable {
             !Woo.isIndependentDebug
         }
         let id = PGField("id", .uuid)
-        let email = PGField("email", .string).cons([.sql(.default("null@null.com")), .required])
-        let age = PGField("age", .int, true).def(30)
-        let createdAt = PGField("create_at", .string, true)
+        let email = PGField("email", .string, true).cons([.sql(.default("null@null.com")), .required])
+        let age = PGField("age", .int).def(30)
+        let createdAt = PGField("create_at", .string)
         let updateAt = PGField("update_at", .string).def("2001-02-27")
     }
     
