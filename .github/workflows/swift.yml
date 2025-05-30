@@ -24,6 +24,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-swift-
 
+    - name: Setup PostgreSQL
+      uses: Harmon758/postgresql-action@v1.0.0
+      with:
+        postgresql version: 17.2
+        postgresql db: postgres
+        postgresql user: postgres
+        postgresql password: password
+    
     - name: Build
       run: swift build -v
 
