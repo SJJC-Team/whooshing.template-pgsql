@@ -1,5 +1,5 @@
 ---
-whooshing.template-basic:
+whooshing.template-pgsql:
     domain: "template"
     pgsql:
         "default":
