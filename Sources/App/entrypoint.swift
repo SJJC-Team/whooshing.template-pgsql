@@ -36,25 +36,56 @@ enum Entrypoint {
     
     static func main() async throws {
         
-        var mode = Whooshing<Inline>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.inlineDebuggingData() : nil)
+        // 初始化你的 PostgreSQL 配置，此处设置，将连接到所有的服务模块，你也可以提供为不同的子模块提供不同的数据库
+        // 这些参数仅在独立测试环境中可用
+        // 生产环境中将由 Whooshing 系统提供加密数据库
+        let dataBases: [Environment.DB] = [
+            .init(
+                name: "postgres",
+                port: 5432,
+                user: "clwang",
+                password: "password"
+            )
+        ]
+        
+        var mode = Whooshing<Inline>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.inlineDebuggingData(databaseConfigs: dataBases) : nil)
         try LoggingSystem.bootstrap(from: &mode.envrionment)
+        Woo.isIndependentDebug = mode.envrionment != .production && testingAllowed
         let inline = try await Whooshing.make(mode)
-        try await Configuration.inline(inline, app: inline.app)
+        do {
+            try await Configuration.inline(inline, app: inline.app)
+        } catch {
+            inline.logger.report(error: error)
+            try? await inline.asyncShutdown()
+            throw error
+        }
         Woo.inline = inline
         
         #if API
-        var apiMode = Whooshing<Api>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.apiDebuggingData() : nil)
+        var apiMode = Whooshing<Api>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.apiDebuggingData(databaseConfigs: dataBases) : nil)
         apiMode.envrionment = mode.envrionment
         let api = try await Whooshing.make(apiMode, with: inline)
-        try await Configuration.api(api, app: api.app)
+        do {
+            try await Configuration.api(api, app: api.app)
+        } catch {
+            api.logger.report(error: error)
+            try? await api.asyncShutdown()
+            throw error
+        }
         Woo.api = api
         #endif
         
         #if HTTPS
-        var httpsMode = Whooshing<Https>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.httpsDebuggingData() : nil)
+        var httpsMode = Whooshing<Https>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.httpsDebuggingData(databaseConfigs: dataBases) : nil)
         httpsMode.envrionment = mode.envrionment
         let https = try await Whooshing.make(httpsMode)
-        try await Configuration.https(https, app: https.app)
+        do {
+            try await Configuration.https(https, app: https.app)
+        } catch {
+            https.logger.report(error: error)
+            try? await https.asyncShutdown()
+            throw error
+        }
         Woo.https = https
         #endif
         
@@ -76,16 +107,19 @@ enum Entrypoint {
     }
 }
 
+/// 记录不同的服务实例，请勿尝试修改其中的内容，除非你知道你在做什么
 @MainActor
 struct Woo {
-    fileprivate(set) static var inline: Whooshing<Inline>!
+    fileprivate(set) nonisolated(unsafe) static var isIndependentDebug = false
+    
+    fileprivate(set) nonisolated(unsafe) static var inline: Whooshing<Inline>!
     
     #if API
-    fileprivate(set) static var api: Whooshing<Api>!
+    fileprivate(set) nonisolated(unsafe) static var api: Whooshing<Api>!
     #endif
     
     #if HTTPS
-    fileprivate(set) static var https: Whooshing<Https>!
+    fileprivate(set) nonisolated(unsafe) static var https: Whooshing<Https>!
     #endif
 }
 

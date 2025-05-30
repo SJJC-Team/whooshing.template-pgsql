@@ -1,5 +1,5 @@
 {
-  "originHash" : "5380f667c2a7bfdf0456fd0a84d044f5510519bf821db86b88f1743820c393c8",
+  "originHash" : "369939da599917c852171ebe841380b6c596824e49f8a9ab7bc0075c975a818f",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -339,8 +339,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SJJC-Team/whooshing.toolbox-server.git",
       "state" : {
-        "revision" : "69e2937d7ef005ed428e4455229b6173c7144edf",
-        "version" : "1.0.12"
+        "revision" : "098de2b2ced2ef227f7a5c29ec083b741d5a31dd",
+        "version" : "1.1.0"
       }
     },
     {
