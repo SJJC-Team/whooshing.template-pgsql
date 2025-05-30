@@ -43,7 +43,7 @@ enum Entrypoint {
             .init(
                 name: "postgres",
                 port: 5432,
-                user: "clwang",
+                user: "postgres",
                 password: "password"
             )
         ]

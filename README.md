@@ -47,7 +47,7 @@
 
 3. **设置模块类型**
 
-   在  [Package.swift](Package.swift) 文件顶部设置你要启用的子模块类型：
+   在 [Package.swift](Package.swift) 文件顶部设置你要启用的子模块类型：
 
    ```swift
    let WhooshingModules: [WhooshingModuleType] = [
@@ -60,7 +60,37 @@
    >
    > 关于子模块，请见  [whooshing.toolbox-server](https://github.com/SJJC-Team/whooshing.toolbox-server)
 
-4. **运行项目**
+4. **调整 PGSQL 的服务连接参数**
+
+   在 [Package.swift](Package.swift) 文件调整参数：
+
+   ```swift
+   .............
+   
+   // 初始化你的 PostgreSQL 配置，此处设置，将连接到所有的服务模块，你也可以提供为不同的子模块提供不同的数据库
+   // 这些参数仅在独立测试环境中可用
+   // 生产环境中将由 Whooshing 系统提供加密数据库
+   let dataBases: [Environment.DB] = [
+       .init(
+           name: "postgres",
+           port: 5432,
+           user: "postgres",
+           password: "password"
+       )
+   ]
+   
+   .............
+   ```
+
+   > 此处的示例连接参数指定该模块连接运行在本地的 PostgreSQL 数据库服务，连接到数据库 "postgres"，端口号 5432，用户 "postgres", 密码为 "password"
+   >
+   > 根据你自己的数据库服务调整连接参数
+
+   该模版默认提供了 users 表的创建示例，将会在服务运行时自动创建
+
+   **再次重申，这些参数仅在独立测试环境中被使用，在生产环境中不会使用这些参数**
+
+5. **运行项目**
 
    使用 Xcode 或命令行运行：
 
@@ -141,7 +171,7 @@ swift test
 * **Linux** (> 20)
 * **Swift** (> 5.9)
 * **watchOS** (> 6.0) **[未测试]**
-* **tvOS**(> 13) **[未测试]
+* **tvOS**(> 13) **[未测试]**
 
 -------
 
