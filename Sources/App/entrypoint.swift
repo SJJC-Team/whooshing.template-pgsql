@@ -107,7 +107,6 @@ enum Entrypoint {
 }
 
 /// 记录不同的服务实例，请勿尝试修改其中的内容，除非你知道你在做什么
-@MainActor
 struct Woo {
     fileprivate(set) nonisolated(unsafe) static var isIndependentDebug = true
     
