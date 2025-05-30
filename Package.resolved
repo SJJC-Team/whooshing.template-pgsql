@@ -1,5 +1,5 @@
 {
-  "originHash" : "67a8cd3490cb5e4302c457268cd5920f17b2fb88c759542ccf87d7d11ffae805",
+  "originHash" : "5380f667c2a7bfdf0456fd0a84d044f5510519bf821db86b88f1743820c393c8",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -303,8 +303,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SJJC-Team/whooshing-vapor.git",
       "state" : {
-        "revision" : "f68f13e3e3aa2ace0884be4d9c0623bb07a4ad7c",
-        "version" : "1.0.5"
+        "revision" : "1a5f4ff2d3f46fd758022bba97aafec09970721d",
+        "version" : "1.0.6"
       }
     },
     {
@@ -317,12 +317,12 @@
       }
     },
     {
-      "identity" : "whooshing.toolbox-client-vapor",
+      "identity" : "whooshing.toolbox-client",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SJJC-Team/whooshing.toolbox-client-vapor",
+      "location" : "https://github.com/SJJC-Team/whooshing.toolbox-client",
       "state" : {
-        "revision" : "1e227b94e2703ffac6c20233804942e8a925119d",
-        "version" : "1.1.9"
+        "revision" : "6220c745b391d50014cc22937402b78bce684ced",
+        "version" : "1.2.1"
       }
     },
     {
@@ -339,17 +339,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SJJC-Team/whooshing.toolbox-server.git",
       "state" : {
-        "revision" : "c77cb21a4344c2081dea9cf06f2fe920185f254c",
-        "version" : "1.0.9"
+        "revision" : "69e2937d7ef005ed428e4455229b6173c7144edf",
+        "version" : "1.0.12"
       }
     },
     {
-      "identity" : "whooshing.toolbox-websocket-vapor",
+      "identity" : "whooshing.toolbox-websocket",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SJJC-Team/whooshing.toolbox-websocket-vapor.git",
+      "location" : "https://github.com/SJJC-Team/whooshing.toolbox-websocket.git",
       "state" : {
-        "revision" : "826fd50de4e0ceb6dc14048a5ac97b19b9320c74",
-        "version" : "1.0.4"
+        "revision" : "37ac313fb01587682aaaf95193df1d0ae1d41932",
+        "version" : "1.1.0"
       }
     }
   ],

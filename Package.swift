@@ -15,7 +15,7 @@ enum WhooshingModuleType: String {
 }
 
 let package = Package(
-    name: "whooshing.template-pgsql",
+    name: "whooshing.template-basic",
     platforms: [
         .macOS(.v10_15),
         .iOS(.v14),
@@ -24,11 +24,11 @@ let package = Package(
     ],
     dependencies: [
         // 💧 Vapor -- Swift 服务器端第三方框架
-        .package(url: "https://github.com/SJJC-Team/whooshing-vapor.git", from: "1.0.0"),
+        .package(url: "https://github.com/SJJC-Team/whooshing-vapor.git", from: "1.0.6"),
         // 🪩 Whooshing 基本工具
-        .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-basic.git", from: "1.2.1"),
+        .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-basic.git", from: "1.3.7"),
         // ⭐️ Whooshing 服务模块系统
-        .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-server.git", .upToNextMajor(from: "1.0.9")),
+        .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-server.git", .upToNextMajor(from: "1.0.12")),
         // 🔵 Swift 高性能网络通讯模块
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         // 🗄 关系型和非关系型数据库的 ORM(对象关系映射)
@@ -43,11 +43,9 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "Vapor", package: "whooshing-vapor"),
-                .product(name: "Fluent", package: "whooshing-fluent"),
                 .product(name: "Cryptos", package: "whooshing.toolbox-basic"),
                 .product(name: "ErrorHandle", package: "whooshing.toolbox-basic"),
                 .product(name: "WhooshingServer", package: "whooshing.toolbox-server"),
-                .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
             ],
             swiftSettings: swiftSettings
         ),
