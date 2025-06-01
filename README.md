@@ -90,12 +90,14 @@
 
    > 此处的示例连接参数指定该模块连接运行在本地的 PostgreSQL 数据库服务，连接到数据库 "postgres"，端口号 5432，用户 "postgres", 密码为 "password"
    >
-   > 根据你自己的数据库服务调整连接参数
-
+   > 你可以通过 `unsafeTestOnlyHost` 调整连接的主机名，但请不要修改 `ProcessInfo.processInfo.environment["GITHUB_PG_TESTING_HOST"]`，这是为了配合 Github 的自动测试脚本而配置的
+   > 
+   >根据你自己的数据库服务调整连接参数
+   
    该模版默认提供了 users 表的创建示例
-
+   
    **再次重申，这些参数仅在独立测试环境中被使用，在生产环境中不会使用这些参数**
-
+   
 5. **运行项目**
 
    使用 Xcode 或命令行运行：
