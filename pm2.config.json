@@ -1,0 +1,9 @@
+{
+    "apps": [
+        {
+            "name": "whooshing.template-pgsql",
+            "cwd": "./",
+            "script": "./App --env production"
+        }
+    ]
+}

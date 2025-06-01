@@ -45,6 +45,12 @@
    name: "whooshing.my-service"
    ```
 
+   同时修改 [pm2.config.json](pm2.config.json)  的 name 字段，确保名称与 Package  的名称相同
+
+   ```json
+   "name": "whooshing.template-pgsql"
+   ```
+
 3. **设置模块类型**
 
    在 [Package.swift](Package.swift) 文件顶部设置你要启用的子模块类型：
@@ -93,12 +99,18 @@
    > 你可以通过 `unsafeTestOnlyHost` 调整连接的主机名，但请不要修改 `ProcessInfo.processInfo.environment["GITHUB_PG_TESTING_HOST"]`，这是为了配合 Github 的自动测试脚本而配置的。此处默认为 "localhost"，但在进行 Github 自动测试时根据其环境修改要连接的主机名。
    > 
    >根据你自己的数据库服务调整连接参数
-   
+
    该模版默认提供了 users 表的创建示例
-   
+
    **再次重申，这些参数仅在独立测试环境中被使用，在生产环境中不会使用这些参数**
-   
-5. **运行项目**
+
+5. **模块配置**
+
+   在 [configure.yaml](configure.yaml) 中根据你的需求进行配置
+
+   > 关于具体的配置细节，请详细参照其中的注释文档
+
+6. **运行项目**
 
    使用 Xcode 或命令行运行：
 
