@@ -4,7 +4,7 @@ import NIOCore
 import NIOPosix
 import Cryptos
 import ErrorHandle
-@testable import FileStorage
+import FileStorage
 import WhooshingServer
 
 /// 该函数为入口函数，是整个 Whooshing 服务的执行起始点
@@ -104,7 +104,6 @@ struct DebuggingParameters {
         UUID(uuidString: "C59C74DC-AF7F-4497-854B-75561D9FE995")!,
         UUID(uuidString: "F02F2803-BF88-4B51-A743-B3AA0F3FF804")!
     ]
-    
 }
 
 // MARK: - 以下为内部初始化代码，不要随意修改，除非你知道在做什么
@@ -152,10 +151,6 @@ extension DebuggingParameters {
 }
 
 extension Woo {
-    
-    enum Err: String, ErrList {
-        case illegalService = "不合法的服务模块"
-    }
     
     static let mode: Whooshing<Inline>.Mode = {
         var mode = Whooshing<Inline>.Mode.detect(testingAllowed ? DebuggingParameters.inlineDebuggingData(dbServiceConfigs: dbServices) : nil)
