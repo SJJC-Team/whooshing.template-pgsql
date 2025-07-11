@@ -9,10 +9,6 @@ final class User: PGModel, @unchecked Sendable {
 
     // 定义该表的所有字段信息，详见 PGFields 协议
     struct Fields: PGFields {
-        /// 是否启动 TDE 加密，这里根据环境判断，若是独立测试模式，则不进行加密(测试机器中一般没有 percona pg_tde 环境)
-        static var tdeEncrypt: Bool {
-            !Woo.isIndependentDebug
-        }
         let id = PGField("id", .uuid)
         let email = PGField("email", .string, true).cons([.sql(.default("null@null.com")), .required])
         let age = PGField("age", .int).def(30)
@@ -41,7 +37,13 @@ final class User: PGModel, @unchecked Sendable {
     // 数据库表结构生成和迁移，负责与数据库交互，进行表创建，迁移，恢复等等交涉
     // 你需要确保 typealias DataModel = User 中，DataModel 正确地指向你的表数据模块
     // 在此例中指向为 User
-    struct MIG: PGMigration, Sendable { typealias DataModel = User }
+    struct MIG: PGMigration, Sendable {
+        typealias DataModel = User
+        /// 是否启动 TDE 加密，这里根据环境判断，若是独立测试模式，则不进行加密(测试机器中一般没有 percona pg_tde 环境)
+        var tdeEncrypt: Bool {
+            !Woo.isIndependentDebug
+        }
+    }
 }
 
 // 以上便完全实现了 PGModel 协议

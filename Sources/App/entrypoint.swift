@@ -4,6 +4,7 @@ import NIOCore
 import NIOPosix
 import Cryptos
 import ErrorHandle
+import FileStorage
 import WhooshingServer
 
 /// 该函数为入口函数，是整个 Vapor 服务的执行起始点
@@ -25,7 +26,6 @@ import WhooshingServer
 @main
 enum Entrypoint {
     enum Err: String, ErrList {
-        var domain: String { "woo.sys.template.configurate.error" }
         case illegalService = "不合法的服务模块"
     }
     
@@ -38,57 +38,64 @@ enum Entrypoint {
     // 这些参数仅在独立测试环境中可用
     // 生产环境中将由 Whooshing 系统提供加密数据库
     //
+    // 该配置设置 PostgreSQL 服务配置，而每个数据库服务中可有多个数据库，通过 dbParameters 进行设置
+    //
     // PostgreSQL 连接的主机名在生产和开发环境中仅仅允许在本地(localhost)
     // 而在测试环境中，可指定要用于测试的 Pg 服务器主机名
     // 该字段将会在生产环境中失效，因此标记为 "unsafeTestOnly"
     // unsafeTestOnlyHost 将会根据环境变量检测是否连接到特定的主机名，主要用于 Github Workflow 的自动测试检查
-    static let dataBases: [Environment.DB] = [
+    static let dbServices: [Environment.DBService] = [
         .init(
-            name: "postgres",
+            name: "testing",
             port: 5432,
-            user: "postgres",
-            password: "password",
-            unsafeTestOnlyHost: ProcessInfo.processInfo.environment["GITHUB_PG_TESTING_HOST"] ?? "localhost"
+            dbParameters: [
+                .init(
+                    name: "postgres",
+                    user: "clwang",
+                    password: "password",
+                    unsafeTestOnlyHost: ProcessInfo.processInfo.environment["GITHUB_PG_TESTING_HOST"] ?? "localhost"
+                )
+            ]
         )
     ]
     
     static func main() async throws {
-        var mode = Whooshing<Inline>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.inlineDebuggingData(databaseConfigs: dataBases) : nil)
+        var mode = Whooshing<Inline>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.inlineDebuggingData(dbServiceConfigs: dbServices) : nil)
         try LoggingSystem.bootstrap(from: &mode.envrionment)
         Woo.isIndependentDebug = mode.envrionment != .production && testingAllowed
-        let inline = try await Whooshing.make(mode)
+        let inline = try await Whooshing.make(mode).get()
         do {
             try await Configuration.inline(inline, app: inline.app)
         } catch {
             inline.logger.report(error: error)
-            try? await inline.asyncShutdown()
+            try? await inline.asyncShutdown().get()
             throw error
         }
         Woo.inline = inline
         
         #if API
-        var apiMode = Whooshing<Api>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.apiDebuggingData(databaseConfigs: dataBases) : nil)
+        var apiMode = Whooshing<Api>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.apiDebuggingData(dbServiceConfigs: dbServices) : nil)
         apiMode.envrionment = mode.envrionment
-        let api = try await Whooshing.make(apiMode, with: inline)
+        let api = try await Whooshing.make(apiMode, with: inline).get()
         do {
             try await Configuration.api(api, app: api.app)
         } catch {
             api.logger.report(error: error)
-            try? await api.asyncShutdown()
+            try? await api.asyncShutdown().get()
             throw error
         }
         Woo.api = api
         #endif
         
         #if HTTPS
-        var httpsMode = Whooshing<Https>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.httpsDebuggingData(databaseConfigs: dataBases) : nil)
+        var httpsMode = Whooshing<Https>.Mode.detect(testingAllowed ? UnsafeDebuggingOnly.httpsDebuggingData(dbServiceConfigs: dbServices) : nil)
         httpsMode.envrionment = mode.envrionment
-        let https = try await Whooshing.make(httpsMode)
+        let https = try await Whooshing.make(httpsMode).get()
         do {
             try await Configuration.https(https, app: https.app)
         } catch {
             https.logger.report(error: error)
-            try? await https.asyncShutdown()
+            try? await https.asyncShutdown().get()
             throw error
         }
         Woo.https = https
@@ -148,13 +155,13 @@ struct UnsafeDebuggingOnly {
         UUID(uuidString: "F02F2803-BF88-4B51-A743-B3AA0F3FF804")!
     ]
     
-    static func inlineDebuggingData(databaseConfigs: [Environment.DB] = []) -> Inline.Debuging {
+    static func inlineDebuggingData(dbServiceConfigs: [Environment.DBService] = []) -> Inline.Debuging {
         .init(
             rootKey: rootKey,
             config: Environment.Config(
                 name: "Testing-Inline-\(inlineListenPort)",
                 port: inlineListenPort,
-                databases: databaseConfigs
+                dbServices: dbServiceConfigs
             ),
             serviceId: serviceIds[0],
             moduleDatas: serviceIds.enumerated().map {
@@ -163,12 +170,12 @@ struct UnsafeDebuggingOnly {
         )
     }
     
-    static func apiDebuggingData(databaseConfigs: [Environment.DB] = []) -> Api.Debuging {
+    static func apiDebuggingData(dbServiceConfigs: [Environment.DBService] = []) -> Api.Debuging {
         .init(
             config: Environment.Config(
                 name: "Tesing-Api-\(apiListenPort)",
                 port: apiListenPort,
-                databases: databaseConfigs
+                dbServices: dbServiceConfigs
             )
         ) { authData in
             guard authData.credential.base64EncodedString() == apiClientCredential else {
@@ -178,12 +185,12 @@ struct UnsafeDebuggingOnly {
         }
     }
     
-    static func httpsDebuggingData(databaseConfigs: [Environment.DB] = []) -> Https.Debuging{
+    static func httpsDebuggingData(dbServiceConfigs: [Environment.DBService] = []) -> Https.Debuging{
         .init(
             config: Environment.Config(
                 name: "Testing-Https-\(httpsListenPort)",
                 port: httpsListenPort,
-                databases: databaseConfigs
+                dbServices: dbServiceConfigs
             )
         )
     }

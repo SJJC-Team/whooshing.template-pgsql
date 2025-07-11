@@ -8,7 +8,7 @@ struct Configuration {
         app.migrations.add(User.MIG())
         // 第一次运行，若你的 PostgreSQL 服务中没有创建该表，则需要进行 autoMigrate
         // 此举将自动创建所需要的数据库表
-         try await app.autoMigrate()
+        try await app.autoMigrate()
         try routes(woo, app)
     }
     
@@ -18,7 +18,7 @@ struct Configuration {
         app.migrations.add(User.MIG())
         // 第一次运行，若你的 PostgreSQL 服务中没有创建该表，则需要进行 autoMigrate
         // 此举将自动创建所需要的数据库表
-         try await app.autoMigrate()
+        try await app.autoMigrate()
         try routes(woo, app)
     }
     
@@ -28,7 +28,7 @@ struct Configuration {
         app.migrations.add(User.MIG())
         // 第一次运行，若你的 PostgreSQL 服务中没有创建该表，则需要进行 autoMigrate
         // 此举将自动创建所需要的数据库表
-         try await app.autoMigrate()
+        try await app.autoMigrate()
         try routes(woo, app)
     }
 }
