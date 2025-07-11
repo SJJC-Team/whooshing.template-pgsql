@@ -1,5 +1,5 @@
 --- # 该模块的名称，在服务模块创建时将使用该名称
-whooshing-example:
+whooshing.template-pgsql:
     # 该模块的根域名 (二级域名)
     # 若设置为 template，则访问域名将为 "template.whooshings.space"
     domain: "template"
@@ -11,8 +11,8 @@ whooshing-example:
         "default":
             # 要连接的数据库名称，一个数据库服务可以有多个数据库
             # 在 Server 中可以通过 "\(PGSQL.name)/\(DB.name)" 访问
-            # 在此例中，其 DatabaseID 分别为 "default/testing" 和 "default/example"
-            databases: ["testing", "example"]
+            # 在此例中，其 DatabaseID 分别为 "default/postgres" 和 "default/file_storage"
+            databases: ["postgres", "file_storage"]
             # 指定 PostgreSQL 的服务端口 (1~19)
             # 每个服务模块都有内部分配的 20 个端口，因此你只需要指定相对端口即可
             port: 0

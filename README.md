@@ -6,6 +6,7 @@
 已集成以下 Whooshing 核心库：
 
 - [whooshing.toolbox-server](https://github.com/SJJC-Team/whooshing.toolbox-server)
+- [whooshing.toolbox-file-storage](https://github.com/SJJC-Team/whooshing.toolbox-file-storage)
 - [whooshing.toolbox-basic](https://github.com/SJJC-Team/whooshing.toolbox-basic)
 - [whooshing.toolbox-pgsql](https://github.com/SJJC-Team/whooshing.toolbox-pgsql)
 - [whooshing-vapor](https://github.com/SJJC-Team/whooshing-vapor)
@@ -68,56 +69,99 @@
 
 4. **调整 PGSQL 的服务连接参数**
 
-   在 [Package.swift](Package.swift) 文件调整参数：
+   在 [entrypoint.swift](entrypoint.swift) 文件调整数据库连接参数：
 
    ```swift
-   .............
-   
-   // 初始化你的 PostgreSQL 配置，此处设置，将连接到所有的服务模块，你也可以提供为不同的子模块提供不同的数据库
-   // 这些参数仅在独立测试环境中可用
-   // 生产环境中将由 Whooshing 系统提供加密数据库
-   //
-   // 该配置设置 PostgreSQL 服务配置，而每个数据库服务中可有多个数据库，通过 dbParameters 进行设置
-   //
-   // PostgreSQL 连接的主机名在生产和开发环境中仅仅允许在本地(localhost)
-   // 而在测试环境中，可指定要用于测试的 Pg 服务器主机名
-   // 该字段将会在生产环境中失效，因此标记为 "unsafeTestOnly"
-   // unsafeTestOnlyHost 将会根据环境变量检测是否连接到特定的主机名，主要用于 Github Workflow 的自动测试检查
+   /// 初始化你的 PostgreSQL 配置，此处设置，将连接到所有的服务模块，你也可以提供为不同的子模块提供不同的数据库
+   /// 这些参数仅在独立测试环境中可用
+   /// 生产环境中将由 Whooshing 系统提供加密数据库
+   ///
+   /// 该配置设置 PostgreSQL 服务配置，而每个数据库服务中可有多个数据库，通过 dbParameters 进行设置
+   ///
+   /// PostgreSQL 连接的主机名在生产和开发环境中仅仅允许在本地(localhost)
+   /// 而在测试环境中，可指定要用于测试的 Pg 服务器主机名
+   /// 该字段将会在生产环境中失效，因此标记为 "testingHost"
+   ///
+   /// fileStorageKey 用于文件加密系统的加密主密钥，为方便测试，硬编码至此。在生产环境中，这些均为无效
+   /// 只有需要作为 FileStorage 的数据库才需要配置 fileStorageKey，若不设置则表示不支持在其上创建文件加密系统
+   /// 作为测试目的，这些密钥可以重复
    static let dbServices: [Environment.DBService] = [
        .init(
-           name: "testing",
+           name: "default",
            port: 5432,
            dbParameters: [
                .init(
                    name: "postgres",
                    user: "postgres",
                    password: "password",
-                   unsafeTestOnlyHost: ProcessInfo.processInfo.environment["GITHUB_PG_TESTING_HOST"] ?? "localhost"
+                   testingHost: "localhost"
+               ),
+               .init(
+                   name: "file_storage",
+                   user: "postgres",
+                   password: "password",
+                   testingHost: "localhost",
+                   fileStorageKey: Crypto.Symm.Key(data: Data(base64Encoded: "UA/0Si+aUkrJou9W2pCDjrTkDBiAfZxdoD1MEFyHP58=")!)
                )
            ]
        )
    ]
-   
-   .............
    ```
 
-   > 此处的示例连接参数指定该模块连接运行在本地的 PostgreSQL 数据库服务，连接到数据库 "postgres"，端口号 5432，用户 "postgres", 密码为 "password"
+   > 此处的示例连接参数指定该模块连接运行在本地的 PostgreSQL 数据库服务(连接到端口号 5432)，该服务中有两个数据库，分别为：
    >
-   > 你可以通过 `unsafeTestOnlyHost` 调整连接的主机名，但请不要修改 `ProcessInfo.processInfo.environment["GITHUB_PG_TESTING_HOST"]`，这是为了配合 Github 的自动测试脚本而配置的。此处默认为 "localhost"，但在进行 Github 自动测试时根据其环境修改要连接的主机名。
-   > 
-   >根据你自己的数据库服务调整连接参数
-
-   该模版默认提供了 users 表的创建示例
+   > * 本机的 `postgres`
+   > * 本机的 `file_storage`，用于创建文件加密存储系统
+   >
+   > 所有的连接参数必须真实有效，可以连接到所指示的数据库，否则会导致服务在启动时崩溃
+   >
+   > 请仔细阅读注释指导，根据你自己的数据库服务调整连接参数
 
    **再次重申，这些参数仅在独立测试环境中被使用，在生产环境中不会使用这些参数**
 
-5. **模块配置**
+5. **文件加密系统配置**
+
+   在 [storages.swift](storages.swift) 中调整文件系统的配置：
+
+   ```swift
+   /// 在此处配置文件加密存储模块，可以配置多个，请自行添加所需要的存储模块配置
+   /// 每个文件加密存储模块都需要将文件索引存入一个数据库中，因此它需要绑定一个数据库实例
+   /// 使用 `Woo.inline.syncMakeFileStorage` 初始化一个 FileStorage 对象，可在全局使用
+   /// 需要注意的是，一旦初始化失败将会导致服务崩溃
+   extension FileStorage {
+       
+       /// 默认文件存储模块，其加密文件的存储位置在 "default" 文件夹下(沙盒中)
+       /// 使用数据库服务 "default" 中的 "file_storage" 数据库存储文件索引
+       /// 创建了一个最基本的 Logger，仅将日志记录打印在程序输出中
+       /// 自动创建根文件夹(加密文件的存储文件夹，相对于沙盒的路径)如果其不存在
+       /// 如果是在独立测试环境中，则启动 debugging 模式，否则使用正常的生产或开发模式
+       static let `default`: FileStorage = {
+           Woo.inline.syncMakeFileStorage(
+               for: db(name: "file_storage", from: "default", in: Woo.inline),
+               storagePath: "default",
+               logger: {
+                   var logger = Logger(label: "default")
+                   logger.logLevel = Woo.logLevel
+                   return logger
+               }(),
+               dirCreateAction: .createIfNeed(withIntermediateDirectories: true),
+               debugging: Woo.isIndependentDebug
+           )
+       }()
+   }
+   ```
+
+   > 你可以创建多个，也可以删除默认的 `default` 存储模块
+   >
+   > 需要调用时，只需使用 `FileStorage.default` 即可，关于 `FileStorage` 请详见 [whooshing.toolbox-file-storage](https://github.com/SJJC-Team/whooshing.toolbox-file-storage)
+
+6. **模块配置**
 
    在 [configure.yaml](configure.yaml) 中根据你的需求进行配置
 
    > 关于具体的配置细节，请详细参照其中的注释文档
 
-6. **运行项目**
+7. **运行项目**
 
    使用 Xcode 或命令行运行：
 
@@ -133,7 +177,7 @@
 
    Xcode 启动默认即为开发环境 (development)
 
-   > 在  [entrypoint.swift](Sources/App/entrypoint.swift) 的 `UnsafeDebuggingOnly` 中定义了默认 rootKey、token、凭据等调试数据，实际部署时应替换或禁用调试代码。
+   > 在  [entrypoint.swift](Sources/App/entrypoint.swift) 的 `DebuggingParameters` 中定义了默认 rootKey、token、凭据等调试数据，实际部署时应替换或禁用调试代码。
    >
    > 具体的调试细节，请参见文档注释
 
@@ -143,6 +187,7 @@
 
 ```
 ├── configure.swift       // 模块配置入口
+├── storages.swift				// 文件加密系统配置文件
 ├── entrypoint.swift      // 项目入口与服务启动控制
 ├── routes.swift          // 路由注册
 ├── Package.swift         // Swift Package 描述文件
@@ -193,8 +238,8 @@ swift test
 
 ### 运行环境
 
-* **macOS** (> 10.15)
-* **iOS** (> 13.0)
+* **macOS** (> 11.0)
+* **iOS** (> 14.0)
 * **Linux** (> 20)
 * **Swift** (> 5.9)
 * **watchOS** (> 6.0) **[未测试]**

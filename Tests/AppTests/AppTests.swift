@@ -7,7 +7,7 @@ import WhooshingServer
 @Suite("App Tests with DB", .serialized)
 struct AppTests {
     private func withApp(_ test: (Whooshing<Https>, Application) async throws -> ()) async throws {
-        let woo = try await Whooshing.make(.testing(UnsafeDebuggingOnly.httpsDebuggingData(dbServiceConfigs: Entrypoint.dbServices))).get()
+        let woo = try await Whooshing.make(.testing(DebuggingParameters.httpsDebuggingData(dbServiceConfigs: Woo.dbServices))).get()
         do {
             try await Configuration.https(woo, app: woo.app)
             try await woo.app.autoMigrate()
