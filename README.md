@@ -274,7 +274,7 @@ swift test
 * **macOS** (> 11.0)
 * **iOS** (> 14.0)
 * **Linux** (> 20)
-* **Swift** (> 5.9)
+* **Swift** (> 6.0)
 * **watchOS** (> 6.0) **[未测试]**
 * **tvOS**(> 13) **[未测试]**
 
@@ -282,6 +282,6 @@ swift test
 
 ### 联系与反馈
 
-如有使用问题或建议，请通过 [GitHub Issues](https://github.com/SJJC-Team/whooshing.toolbox-server/issues) 提交反馈。
+如有使用问题或建议，请通过 [GitHub Issues](https://github.com/SJJC-Team/whooshing.template-pgsql/issues) 提交反馈。
 
 或发至邮箱 [contact@official.whooshings.space](mailto:contact@official.whooshings.space)
