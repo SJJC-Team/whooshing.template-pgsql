@@ -214,8 +214,6 @@ extension Woo {
     #endif
     
     static func main() async throws {
-        // 并行启动服务
-        
         var dbs: Set<Environment.DB> = inline.databases
         var apps: [any WhooshingService] = [inline]
         
@@ -243,6 +241,7 @@ extension Woo {
             try await Configuration.migrationApply(for: app)
         }
         
+        // 并行启动服务
         #if !API && !HTTPS
         try await inline.executeWithAsyncShutdown().get()
         #else
