@@ -56,13 +56,13 @@ enum Woo {
             dbParameters: [
                 .init(
                     name: "postgres",
-                    user: "postgres",
+                    user: "clwang",
                     password: "password",
                     testingHost: "localhost"
                 ),
                 .init(
                     name: "file_storage",
-                    user: "postgres",
+                    user: "clwang",
                     password: "password",
                     testingHost: "localhost",
                     fileStorageKey: Crypto.Symm.Key(data: Data(base64Encoded: "UA/0Si+aUkrJou9W2pCDjrTkDBiAfZxdoD1MEFyHP58=")!)

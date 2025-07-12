@@ -10,6 +10,9 @@ struct AppTests {
         let woo = try await Whooshing.make(.testing(DebuggingParameters.httpsDebuggingData(dbServiceConfigs: Woo.dbServices))).get()
         do {
             try await Configuration.https(woo, app: woo.app)
+            for db in woo.databases {
+                try await Configuration.migrationRegister(in: db, for: [woo])
+            }
             try await woo.app.autoMigrate()
             try await test(woo, woo.app)
             try await woo.app.autoRevert()
