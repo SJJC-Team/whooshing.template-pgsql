@@ -34,7 +34,7 @@ enum Woo {
     static let isIndependentDebug: Bool = mode.envrionment != .production && testingAllowed
     
     /// 指定所有日志的记录等级
-    static let logLevel: Logger.Level = .notice
+    static let logLevel: Logger.Level = .info
     
     /// 初始化你的 PostgreSQL 配置，此处设置，将连接到所有的服务模块，你也可以提供为不同的子模块提供不同的数据库
     /// 这些参数仅在独立测试环境中可用
@@ -163,7 +163,7 @@ extension Woo {
     static let inline: Whooshing<Inline> = {
         asyncToSync {
             let inline = try await Whooshing.make(mode).get()
-            inline.app.logger.logLevel = logLevel
+            inline.logger.logLevel = logLevel
             do {
                 try await Configuration.inline(inline, app: inline.app)
             } catch {
@@ -181,7 +181,7 @@ extension Woo {
             var apiMode = Whooshing<Api>.Mode.detect(testingAllowed ? DebuggingParameters.apiDebuggingData(dbServiceConfigs: dbServices) : nil)
             apiMode.envrionment = mode.envrionment
             let api = try await Whooshing.make(apiMode, with: inline).get()
-            api.app.logger.logLevel = logLevel
+            api.logger.logLevel = logLevel
             do {
                 try await Configuration.api(api, app: api.app)
             } catch {
@@ -200,7 +200,7 @@ extension Woo {
             var httpsMode = Whooshing<Https>.Mode.detect(testingAllowed ? DebuggingParameters.httpsDebuggingData(dbServiceConfigs: dbServices) : nil)
             httpsMode.envrionment = mode.envrionment
             let https = try await Whooshing.make(httpsMode).get()
-            https.app.logger.logLevel = logLevel
+            https.logger.logLevel = logLevel
             do {
                 try await Configuration.https(https, app: https.app)
             } catch {
@@ -215,6 +215,34 @@ extension Woo {
     
     static func main() async throws {
         // 并行启动服务
+        
+        var dbs: Set<Environment.DB> = inline.databases
+        var apps: [any WhooshingService] = [inline]
+        
+        #if API
+        dbs.formUnion(api.databases)
+        apps.append(api)
+        #endif
+        
+        #if HTTPS
+        dbs.formUnion(https.databases)
+        apps.append(https)
+        #endif
+        
+        for db in dbs {
+            var relatedApp: [any WhooshingService] = []
+            for app in apps {
+                if (app.databases.contains { $0.id == db.id }) {
+                    relatedApp.append(app)
+                }
+            }
+            try await Configuration.migrationRegister(in: db, for: relatedApp)
+        }
+        
+        for app in apps {
+            try await Configuration.migrationApply(for: app)
+        }
+        
         #if !API && !HTTPS
         try await inline.executeWithAsyncShutdown().get()
         #else

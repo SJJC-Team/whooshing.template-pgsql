@@ -28,13 +28,13 @@ let package = Package(
         // 🪩 Whooshing 基本工具
         .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-basic.git", from: "1.4.4"),
         // ⭐️ Whooshing 服务模块系统
-        .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-server.git", .upToNextMajor(from: "1.1.7")),
+        .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-server.git", .upToNextMajor(from: "1.1.8")),
         // 🔵 Swift 高性能网络通讯模块
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         // 🗄 PostgreSQL 数据库的 ORM(对象关系映射)
         .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-pgsql.git", .upToNextMajor(from: "1.0.5")),
         // 📁 Whooshing 文件加密系统模块
-        .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-file-storage", .upToNextMajor(from: "1.0.1"))
+        .package(url: "https://github.com/SJJC-Team/whooshing.toolbox-file-storage", .upToNextMajor(from: "1.0.2"))
     ],
     targets: [
         .executableTarget(

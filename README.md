@@ -119,7 +119,40 @@
 
    **再次重申，这些参数仅在独立测试环境中被使用，在生产环境中不会使用这些参数**
 
-5. **文件加密系统配置**
+5. **配置数据库迁移**
+
+   在 [configure.swift](configure.swift) 中登记以及应用数据库的初始化，以创建或迁移数据库表结构
+
+   ```swift
+   /// 数据库的迁移配置登记，用于初始化数据库的表结构
+   /// 每个数据库可能被多个子服务所连接(inline, api, https)，但一个数据库一般应当仅初始化一次
+   /// 避免多个子服务抢占初始化表结构
+   /// Whooshing 系统将会为每个所配置的数据库调用该配置函数，以及该数据库被连接的子服务
+   /// 保证所提供的数据库绝不重复，因此你可以在这里安全地分别为每个数据库登记迁移
+   /// 这里登记了迁移并不会马上应用到真实数据库中，请见下一步 `migrationApply(in:)`
+   static func migrationRegister(in database: Environment.DB, for services: [any WhooshingService]) async throws {
+       if database.id.string == "default/postgres" {
+           /// 作为示例，只对在 default 数据库服务中的 postgres 数据库进行初始化，
+           /// 使用 database.id 做分辨，id 规则遵循 数据库服务名 + / + 数据库名
+           /// 至于有哪些数据库请详见你的 `configure.yaml`(生产环境) 中 `pgsql` 下的配置，
+           /// 或 `entrypoint.swift`(测试环境) 中 `Woo.dbServices` 下的配置
+           /// 此处，default 数据库服务中的另一个数据库(file_storage)无需进行额外初始化
+           /// FileStorage 模块会自行初始化
+           services.first!.app.migrations.add(User.MIG(), to: database.id)
+       }
+   }
+   
+   /// 数据库迁移登记完成之后，将这些迁移应用到真实数据库中
+   static func migrationApply(for service: any WhooshingService) async throws {
+       // 第一次运行，若你的 PostgreSQL 服务中没有创建该表，则需要进行 autoMigrate
+       // 此举将自动创建所需要的数据库表，一般来说只需运行一次即可，若表结构已经存在可注释这一行
+       try await service.app.autoMigrate()
+   }
+   ```
+
+   > 请仔细阅读注释引导，并照你的需求进行修改
+
+6. **文件加密系统配置**
 
    在 [storages.swift](storages.swift) 中调整文件系统的配置：
 
@@ -155,13 +188,13 @@
    >
    > 需要调用时，只需使用 `FileStorage.default` 即可，关于 `FileStorage` 请详见 [whooshing.toolbox-file-storage](https://github.com/SJJC-Team/whooshing.toolbox-file-storage)
 
-6. **模块配置**
+7. **模块配置**
 
    在 [configure.yaml](configure.yaml) 中根据你的需求进行配置
 
    > 关于具体的配置细节，请详细参照其中的注释文档
 
-7. **运行项目**
+8. **运行项目**
 
    使用 Xcode 或命令行运行：
 

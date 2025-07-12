@@ -9,11 +9,11 @@ final class User: PGModel, @unchecked Sendable {
 
     // 定义该表的所有字段信息，详见 PGFields 协议
     struct Fields: PGFields {
-        let id = PGField("id", .uuid)
-        let email = PGField("email", .string, true).cons([.sql(.default("null@null.com")), .required])
-        let age = PGField("age", .int).def(30)
+        let id = PGField("id", .uuid)                           .primary
+        let email = PGField("email", .string)                   .required.unique.def("null@null.com")
+        let age = PGField("age", .int)                          .def(30)
         let createdAt = PGField("create_at", .string)
-        let updateAt = PGField("update_at", .string).def("2001-02-27")
+        let updateAt = PGField("update_at", .string)            .def("2001-02-27")
     }
     
     // 生成字段信息实例
