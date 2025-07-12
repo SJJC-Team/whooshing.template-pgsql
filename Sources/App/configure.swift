@@ -7,8 +7,8 @@ struct Configuration {
     static func https(_ woo: Whooshing<Https>, app: Application) async throws {
         app.migrations.add(User.MIG())
         // 第一次运行，若你的 PostgreSQL 服务中没有创建该表，则需要进行 autoMigrate
-        // 此举将自动创建所需要的数据库表
-         try await app.autoMigrate()
+        // 此举将自动创建所需要的数据库表，一般来说只需运行一次即可，若表结构已经存在可注释这一行
+        try await app.autoMigrate()
         try routes(woo, app)
     }
     
@@ -17,8 +17,8 @@ struct Configuration {
     static func api(_ woo: Whooshing<Api>, app: Application) async throws {
         app.migrations.add(User.MIG())
         // 第一次运行，若你的 PostgreSQL 服务中没有创建该表，则需要进行 autoMigrate
-        // 此举将自动创建所需要的数据库表
-         try await app.autoMigrate()
+        // 此举将自动创建所需要的数据库表，一般来说只需运行一次即可，若表结构已经存在可注释这一行
+        try await app.autoMigrate()
         try routes(woo, app)
     }
     
@@ -27,8 +27,8 @@ struct Configuration {
     static func inline(_ woo: Whooshing<Inline>, app: Application) async throws {
         app.migrations.add(User.MIG())
         // 第一次运行，若你的 PostgreSQL 服务中没有创建该表，则需要进行 autoMigrate
-        // 此举将自动创建所需要的数据库表
-         try await app.autoMigrate()
+        // 此举将自动创建所需要的数据库表，一般来说只需运行一次即可，若表结构已经存在可注释这一行
+        try await app.autoMigrate()
         try routes(woo, app)
     }
 }
