@@ -1,6 +1,7 @@
 import Vapor
 import Logging
 import FileStorage
+import FileStorageDriver
 import WhooshingServer
 
 /// 在此处配置文件加密存储模块，可以配置多个，请自行添加所需要的存储模块配置
@@ -18,11 +19,7 @@ extension FileStorage {
         Woo.inline.syncMakeFileStorage(
             for: db(name: "file_storage", from: "default", in: Woo.inline),
             storagePath: "default",
-            logger: {
-                var logger = Logger(label: "default")
-                logger.logLevel = Woo.logLevel
-                return logger
-            }(),
+            logger: Woo.logger,
             dirCreateAction: .createIfNeed(withIntermediateDirectories: true),
             debugging: Woo.isIndependentDebug
         )

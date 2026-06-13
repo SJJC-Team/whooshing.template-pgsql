@@ -101,7 +101,11 @@
                    user: "postgres",
                    password: "password",
                    testingHost: "localhost",
-                   fileStorageKey: Crypto.Symm.Key(data: Data(base64Encoded: "UA/0Si+aUkrJou9W2pCDjrTkDBiAfZxdoD1MEFyHP58=")!)
+                   fileStorageKey: SendableSymmKey(
+                       key: .init(
+                           data: Data(base64Encoded: "UA/0Si+aUkrJou9W2pCDjrTkDBiAfZxdoD1MEFyHP58=")!
+                       )
+                   )
                )
            ]
        )
@@ -172,18 +176,14 @@
            Woo.inline.syncMakeFileStorage(
                for: db(name: "file_storage", from: "default", in: Woo.inline),
                storagePath: "default",
-               logger: {
-                   var logger = Logger(label: "default")
-                   logger.logLevel = Woo.logLevel
-                   return logger
-               }(),
+               logger: Woo.logger,
                dirCreateAction: .createIfNeed(withIntermediateDirectories: true),
                debugging: Woo.isIndependentDebug
            )
        }()
    }
    ```
-
+   
    > 你可以创建多个，也可以删除默认的 `default` 存储模块
    >
    > 需要调用时，只需使用 `FileStorage.default` 即可，关于 `FileStorage` 请详见 [whooshing.toolbox-file-storage](https://github.com/SJJC-Team/whooshing.toolbox-file-storage)
@@ -271,8 +271,8 @@ swift test
 
 ### 运行环境
 
-* **macOS** (> 11.0)
-* **iOS** (> 14.0)
+* **macOS** (> 13.0)
+* **iOS** (> 16.0)
 * **Linux** (> 20)
 * **Swift** (> 6.0)
 * **watchOS** (> 6.0) **[未测试]**

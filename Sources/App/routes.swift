@@ -12,4 +12,5 @@ func routes<T>(_ woo: Whooshing<T>, _ app: Application) throws where T: ServiceT
     }
     
     try app.register(collection: UserController())
+    try app.register(collection: FileController())
 }
