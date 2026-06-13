@@ -23,7 +23,6 @@ let package = Package(
         .tvOS(.v13),
     ],
     dependencies: [
-        .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0"),
         // 💧 Vapor -- Swift 服务器端第三方框架
         .package(url: "https://github.com/whooshing-workshop/whooshing-vapor.git", from: "1.1.2"),
         // 🪩 Whooshing 基本工具
