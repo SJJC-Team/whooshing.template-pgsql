@@ -220,7 +220,7 @@
 
 ```
 ├── configure.swift       // 模块配置入口
-├── storages.swift				// 文件加密系统配置文件
+├── storages.swift		  	// 文件加密系统配置文件
 ├── entrypoint.swift      // 项目入口与服务启动控制
 ├── routes.swift          // 路由注册
 ├── Package.swift         // Swift Package 描述文件
@@ -242,6 +242,21 @@ GET /hello
 ```
 
 你可以在 routes.swift 中添加自定义路由。
+
+另外还包括两个简单的路由控制器 `FileController` 和 `UserController`:
+
+```swift
+FileController 提供:
+    - PUT /file: 存储文件
+    - DELETE /file: 删除文件
+    - POST /file: 读取文件
+    
+UserController 提供:
+    - GET /users/find: 查找用户
+    - POST /users/register: 注册用户
+    - DELETE /users/delete: 删除用户
+    - DELETE /users/<要删除用户的 email>: 通过用户的 email 删除用户 
+```
 
 -------
 
