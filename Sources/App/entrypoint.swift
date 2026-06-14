@@ -39,7 +39,7 @@ enum Woo {
     static let logger: Logger = {
         var logger = Logger(label: "app")
         /// 指定所有日志的记录等级
-        logger.logLevel = .notice
+        logger.logLevel = .info
         return logger
     }()
     
