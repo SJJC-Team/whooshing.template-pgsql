@@ -26,6 +26,8 @@ import WhooshingServer
 /// 若是 xcode 构建，则默认为 development 环境
 @main
 enum Woo {
+    /// 该服务模块的名称
+    static let appName = "App"
     
     /// 配置该服务模块是否接受运行在测试环境中，可将其改为 false
     /// 这样，若检测到环境为 testing 将会直接 fatalError
@@ -37,7 +39,7 @@ enum Woo {
     
     /// 该模块的日志配置
     static let logger: Logger = {
-        var logger = Logger(label: "app")
+        var logger = Logger(label: appName.lowercased())
         /// 指定所有日志的记录等级
         logger.logLevel = .info
         return logger
@@ -86,7 +88,7 @@ enum Woo {
 /// 用于调试模式的参数，仅在独立调试和测试模式下生效，不会在生产或非独立开发模式下生效
 /// 关于模式，见 `Whooshing.Mode`
 struct DebuggingParameters {
-    /// 服务跟密钥
+    /// 服务根密钥
     static let rootKey = SendableSymmKey(key: .init(data: Data(base64Encoded: rootKeyStr)!))
     static let rootKeyStr = "0apYyvRtLuo7l07zuqbEjFIxDFZ1sIWabKM9mMOOIzQ="
     
@@ -126,7 +128,7 @@ extension DebuggingParameters {
         .init(
             rootKey: rootKey,
             config: Environment.Config(
-                name: "app",
+                name: Woo.appName.lowercased(),
                 port: inlineListenPort,
                 dbServices: dbServiceConfigs
             ).load(fileStorage: fileStorageParas),
@@ -140,7 +142,7 @@ extension DebuggingParameters {
     static func apiDebuggingData(dbServiceConfigs: [Environment.DBService] = []) -> Api.Debuging {
         .init(
             config: Environment.Config(
-                name: "app",
+                name: Woo.appName.lowercased(),
                 port: apiListenPort,
                 dbServices: dbServiceConfigs
             ).load(fileStorage: fileStorageParas)
@@ -155,7 +157,7 @@ extension DebuggingParameters {
     static func httpsDebuggingData(dbServiceConfigs: [Environment.DBService] = []) -> Https.Debuging{
         .init(
             config: Environment.Config(
-                name: "app",
+                name: Woo.appName.lowercased(),
                 port: httpsListenPort,
                 dbServices: dbServiceConfigs
             ).load(fileStorage: fileStorageParas)
