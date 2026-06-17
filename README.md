@@ -52,6 +52,15 @@
    "name": "whooshing.template-pgsql"
    ```
 
+   以及 [entrypoint.swift](./Sources/App/entrypoint.swift) 的 `enum Woo` 声明中修改 `appName`:
+
+   ```swift
+   /// 该服务模块的名称
+   static let appName = "App"
+   ```
+
+   此处的名称仅用于各类相关资源的标识，比如文件存储的路径中会采用该名称，但并不会作为服务名称展示
+
 3. **设置模块类型**
 
    在 [Package.swift](Package.swift) 文件顶部设置你要启用的子模块类型：
@@ -67,7 +76,7 @@
    >
    > 关于子模块，请见  [whooshing.toolbox-server](https://github.com/SJJC-Team/whooshing.toolbox-server)
 
-4. **调整 PGSQL 的服务连接参数**
+4. **调整 PGSQL 服务连接参数与 FileStorage 部署参数**
 
    在 [entrypoint.swift](entrypoint.swift) 文件调整数据库连接参数：
 
@@ -123,6 +132,26 @@
 
    **再次重申，这些参数仅在独立测试环境中被使用，在生产环境中不会使用这些参数**
 
+   
+
+   在接下来的声明中调整文件加密存储系统的配置:
+
+   ```swift
+   /// 初始化文件加密存储模块的配置，此处设置，将连接到所有的服务模块
+   /// FileStorage 为全局单例模式，一个服务模块仅能部署一个文件存储实例
+   /// 这些参数仅在独立测试环境中可用
+   /// 生产环境中将由 Whooshing 系统提供所有的配置参数
+   ///
+   /// dir 参数指定该文件系统的加密文件所存储的真实磁盘位置
+   /// 若该 URL 路径不存在，系统会自动创建包括所有的路径中间目录
+   /// 作为默认配置，FileStorage 的加密文件将保存在 ~/app_file_storage 文件夹中
+   static let fileStorageParas = Environment.FS(
+       dir: URL.homeDirectoryURL.appending(component: "app_file_storage")
+   )
+   ```
+
+   **这些参数仅在独立测试环境中被使用，在生产环境中不会使用这些参数**
+
 5. **配置数据库迁移**
 
    在 [configure.swift](configure.swift) 中登记以及应用数据库的初始化，以创建或迁移数据库表结构
@@ -161,17 +190,17 @@
    在 [storages.swift](storages.swift) 中调整文件系统的配置：
 
    ```swift
-   /// 在此处配置文件加密存储模块，可以配置多个，请自行添加所需要的存储模块配置
-   /// 每个文件加密存储模块都需要将文件索引存入一个数据库中，因此它需要绑定一个数据库实例
+   /// 在此处配置文件加密存储模块，仅允许配置一个，默认为全局单例模式
+   /// 文件加密存储模块需要将文件索引存入一个数据库中，因此它需要绑定一个数据库实例
    /// 使用 `Woo.inline.syncMakeFileStorage` 初始化一个 FileStorage 对象，可在全局使用
-   /// 需要注意的是，一旦初始化失败将会导致服务崩溃
+   /// 一旦初始化失败将会导致服务崩溃
    extension FileStorage {
        
        /// 默认文件存储模块，其加密文件的存储位置在 "default" 文件夹下(沙盒中)
        /// 使用数据库服务 "default" 中的 "file_storage" 数据库存储文件索引
        /// 创建了一个最基本的 Logger，仅将日志记录打印在程序输出中
        /// 自动创建根文件夹(加密文件的存储文件夹，相对于沙盒的路径)如果其不存在
-       /// 如果是在独立测试环境中，则启动 debugging 模式，否则使用正常的生产或开发模式
+       /// 若在独立测试环境中，则启动 debugging 模式，否则使用正常的生产或开发模式
        static let `default`: FileStorage = {
            Woo.inline.syncMakeFileStorage(
                for: db(name: "file_storage", from: "default", in: Woo.inline),
