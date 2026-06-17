@@ -29,6 +29,9 @@ enum Woo {
     /// 该服务模块的名称
     static let appName = "App"
     
+    /// 本模块的 Id，仅用于模块标识和区分，不涉及任何机密操作，与 serviceId 不同，勿混用
+    static let moduleId = UUID(uuidString: "9D61FB39-D7EF-46B6-8690-4DDD23E561A4")!
+    
     /// 配置该服务模块是否接受运行在测试环境中，可将其改为 false
     /// 这样，若检测到环境为 testing 将会直接 fatalError
     /// 另请详见 `Whooshing.Mode`
@@ -83,6 +86,37 @@ enum Woo {
             ]
         )
     ]
+    
+    /// 初始化文件加密存储模块的配置，此处设置，将连接到所有的服务模块
+    /// FileStorage 为全局单例模式，一个服务模块仅能部署一个文件存储实例
+    /// 这些参数仅在独立测试环境中可用
+    /// 生产环境中将由 Whooshing 系统提供所有的配置参数
+    ///
+    /// dir 参数指定该文件系统的加密文件所存储的真实磁盘位置
+    /// 若该 URL 路径不存在，系统会自动创建包括所有的路径中间目录
+    /// 作为默认配置，FileStorage 的加密文件将保存在 ~/app_file_storage 文件夹中
+    static let fileStorageParas = Environment.FS(
+        dir: URL.homeDirectoryURL.appending(component: "app_file_storage")
+    )
+}
+
+/// 从 `dbServices` 中根据名称取得数据库的配置
+///
+/// - Parameters:
+///     - name: 数据库的名称
+///     - service: 数据库服务的名称
+///     - woo: 数据库服务所在的服务子模块
+/// - Returns: 所创建的数据库服务
+///
+/// 如果未找到，将直接导致程序崩溃
+func db<T>(name: String, from service: String, in woo: Whooshing<T>) -> Environment.DB {
+    guard let dbService = (woo.config.dbServices.first { $0.id.string == service }) else {
+        fatalError("未找到所指定的数据库服务配置")
+    }
+    guard let db = (dbService.dbs.first { $0.id == .init(string: "\(service)/\(name)") }) else {
+        fatalError("未能找到所指定的数据库配置")
+    }
+    return db
 }
 
 /// 用于调试模式的参数，仅在独立调试和测试模式下生效，不会在生产或非独立开发模式下生效
@@ -106,9 +140,18 @@ struct DebuggingParameters {
     /// api 子模块监听的段口号
     static let apiListenPort = 6502
     
+    /// 本模块的 Inline 子模块的 ServiceId
+    /// 默认取自 serviceIds 中的第一项
+    static var serviceId: UUID { serviceIds[0] }
+    
+    /// 所加载的驱动，该模块加载
+    ///     FileStorage: 文件加密存储模块
+    static let driverKeys: [any Environment.DriverKey.Type] = [FileStorageDriverKey.self]
+    
     /// inline 模块接受的来源服务的 ID
     ///
-    /// 若有其他服务模块访问该模块，其 ServiceId 必须在以下白名单中，否则将会被拒绝连线
+    /// 若有其他服务模块访问该模块，其 ServiceId 必须在以下白名单中，
+    /// 且访问者的 serviceId != 被访问者的 serviceId，否则将会被拒绝连线
     /// 作为例子仅提供 5 个，你可以按需添加或减少
     static let serviceIds = [
         UUID(uuidString: "F1ECC1D7-6E19-4F50-9B89-68FAA332B415")!,
@@ -122,17 +165,17 @@ struct DebuggingParameters {
 // MARK: - 以下为内部初始化代码，不要随意修改，除非你知道在做什么
 
 extension DebuggingParameters {
-    static let fileStorageParas = Environment.FS(dir: URL.homeDirectoryURL.appending(component: "app_file_storage"))
-    
     static func inlineDebuggingData(dbServiceConfigs: [Environment.DBService] = []) -> Inline.Debuging {
         .init(
             rootKey: rootKey,
             config: Environment.Config(
+                id: Woo.moduleId,
                 name: Woo.appName.lowercased(),
                 port: inlineListenPort,
                 dbServices: dbServiceConfigs
-            ).load(fileStorage: fileStorageParas),
-            serviceId: serviceIds[0],
+            )
+            .load(fileStorage: Woo.fileStorageParas),
+            serviceId: serviceId,
             moduleDatas: serviceIds.enumerated().map {
                 .init(name: "Testing-Inline-\(inlineListenPort + $0)", serviceId: $1, connection: nil)
             }
@@ -142,10 +185,12 @@ extension DebuggingParameters {
     static func apiDebuggingData(dbServiceConfigs: [Environment.DBService] = []) -> Api.Debuging {
         .init(
             config: Environment.Config(
+                id: Woo.moduleId,
                 name: Woo.appName.lowercased(),
                 port: apiListenPort,
                 dbServices: dbServiceConfigs
-            ).load(fileStorage: fileStorageParas)
+            )
+            .load(fileStorage: Woo.fileStorageParas)
         ) { authData in
             guard authData.credential.base64EncodedString() == apiClientCredential else {
                 throw Abort(.badRequest, reason: "用户凭据无效")
@@ -157,10 +202,12 @@ extension DebuggingParameters {
     static func httpsDebuggingData(dbServiceConfigs: [Environment.DBService] = []) -> Https.Debuging{
         .init(
             config: Environment.Config(
+                id: Woo.moduleId,
                 name: Woo.appName.lowercased(),
                 port: httpsListenPort,
                 dbServices: dbServiceConfigs
-            ).load(fileStorage: fileStorageParas)
+            )
+            .load(fileStorage: Woo.fileStorageParas)
         )
     }
 }
